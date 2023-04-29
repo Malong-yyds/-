@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<process version="5.3.013">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="5.3.013" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="text:read_document" compatibility="5.3.002" expanded="true" height="60" name="Read Document" width="90" x="179" y="75">
+        <parameter key="file" value="D:\rapidminer\rapidminer-5.3.013-kg-data\rapidminer\data\Zhilian\Zhilian-train\0000043.txt"/>
+        <parameter key="extract_text_only" value="true"/>
+        <parameter key="use_file_extension_as_type" value="true"/>
+        <parameter key="content_type" value="txt"/>
+        <parameter key="encoding" value="UTF-8"/>
+      </operator>
+      <operator activated="true" class="text:replace_tokens" compatibility="5.3.002" expanded="true" height="60" name="Replace Tokens" width="90" x="313" y="75">
+        <list key="replace_dictionary">
+          <parameter key="\s*\n\s*" value="%n"/>
+          <parameter key="." value="$0 "/>
+        </list>
+      </operator>
+      <operator activated="true" class="text:replace_tokens" compatibility="5.3.002" expanded="true" height="60" name="Replace Tokens (2)" width="90" x="447" y="75">
+        <list key="replace_dictionary">
+          <parameter key="%\s*n" value="%n"/>
+        </list>
+      </operator>
+      <operator activated="true" class="text:tokenize" compatibility="5.3.002" expanded="true" height="60" name="Tokenize" width="90" x="581" y="75">
+        <parameter key="mode" value="regular expression"/>
+        <parameter key="characters" value=".:"/>
+        <parameter key="expression" value="\s+"/>
+        <parameter key="language" value="English"/>
+        <parameter key="max_token_length" value="3"/>
+      </operator>
+      <operator activated="true" class="chprocess:extract_document_tokens" compatibility="5.2.000" expanded="true" height="76" name="Extract Tokens from Documents" width="90" x="112" y="210">
+        <parameter key="add_meta_information" value="false"/>
+      </operator>
+      <operator activated="true" class="generate_attributes" compatibility="5.3.013" expanded="true" height="76" name="Generate Attributes" width="90" x="313" y="210">
+        <list key="function_descriptions">
+          <parameter key="label" value="&quot;O&quot;"/>
+        </list>
+        <parameter key="use_standard_constants" value="true"/>
+        <parameter key="keep_all" value="true"/>
+      </operator>
+      <operator activated="true" class="annotation:annotate_named_entity" compatibility="5.2.000" expanded="true" height="76" name="Annotate Named Entities" width="90" x="514" y="210">
+        <parameter key="token_attribute" value="token"/>
+        <parameter key="label_attribute" value="label"/>
+        <parameter key="copy_attribute" value=""/>
+        <parameter key="type_attribute" value=""/>
+        <parameter key="color_attribute" value=""/>
+        <parameter key="recommendation_attribute" value=""/>
+        <list key="type_colors">
+          <parameter key="岗位职责" value="153,255,255"/>
+          <parameter key="学历" value="255,255,153"/>
+          <parameter key="专业" value="204,255,204"/>
+          <parameter key="工作经验" value="255,204,204"/>
+          <parameter key="技术能力" value="204,204,255"/>
+          <parameter key="薪资福利" value="255,51,0"/>
+          <parameter key="工作时间" value="0,204,204"/>
+          <parameter key="工作地点" value="204,204,0"/>
+          <parameter key="年龄要求" value="255,0,255"/>
+          <parameter key="其他要求" value="0,255,255"/>
+        </list>
+        <parameter key="none_type_text" value="O"/>
+      </operator>
+      <operator activated="true" breakpoints="before" class="annotation:named_entity_to_data" compatibility="5.2.000" expanded="true" height="76" name="Named Entities to Data" width="90" x="715" y="210"/>
+      <operator activated="true" class="generate_attributes" compatibility="5.3.013" expanded="true" height="76" name="Generate Attributes (2)" width="90" x="112" y="390">
+        <list key="function_descriptions">
+          <parameter key="type" value="if(matches(token,&quot;[\\u4E00-\\u9FFF]+&quot;),&quot;汉字&quot;, if( matches(token,&quot;\\d+&quot;),&quot;数字&quot;, if(matches(token,&quot;[A-Za-z-]+&quot;),&quot;字母&quot;,,&quot;其他&quot;) ) )"/>
+        </list>
+        <parameter key="use_standard_constants" value="true"/>
+        <parameter key="keep_all" value="true"/>
+      </operator>
+      <operator activated="true" class="misc:select_attributes_with_order" compatibility="5.2.000" expanded="true" height="76" name="Select Attributes with Order" width="90" x="246" y="390">
+        <enumeration key="selected_attributes">
+          <parameter key="attribute_name" value="token"/>
+          <parameter key="attribute_name" value="type"/>
+          <parameter key="attribute_name" value="label"/>
+        </enumeration>
+      </operator>
+      <operator activated="true" class="write_csv" compatibility="5.3.013" expanded="true" height="76" name="Write CSV" width="90" x="447" y="390">
+        <parameter key="csv_file" value="D:\rapidminer\00043.csv"/>
+        <parameter key="column_separator" value=";"/>
+        <parameter key="write_attribute_names" value="true"/>
+        <parameter key="quote_nominal_values" value="true"/>
+        <parameter key="format_date_attributes" value="true"/>
+        <parameter key="append_to_file" value="false"/>
+        <parameter key="encoding" value="SYSTEM"/>
+      </operator>
+      <connect from_op="Read Document" from_port="output" to_op="Replace Tokens" to_port="document"/>
+      <connect from_op="Replace Tokens" from_port="document" to_op="Replace Tokens (2)" to_port="document"/>
+      <connect from_op="Replace Tokens (2)" from_port="document" to_op="Tokenize" to_port="document"/>
+      <connect from_op="Tokenize" from_port="document" to_op="Extract Tokens from Documents" to_port="documents 1"/>
+      <connect from_op="Extract Tokens from Documents" from_port="example set" to_op="Generate Attributes" to_port="example set input"/>
+      <connect from_op="Generate Attributes" from_port="example set output" to_op="Annotate Named Entities" to_port="tokens"/>
+      <connect from_op="Annotate Named Entities" from_port="annotation" to_op="Named Entities to Data" to_port="annotation"/>
+      <connect from_op="Named Entities to Data" from_port="sequences" to_op="Generate Attributes (2)" to_port="example set input"/>
+      <connect from_op="Generate Attributes (2)" from_port="example set output" to_op="Select Attributes with Order" to_port="example set input"/>
+      <connect from_op="Select Attributes with Order" from_port="example set output" to_op="Write CSV" to_port="input"/>
+      <connect from_op="Write CSV" from_port="through" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+    </process>
+  </operator>
+</process>
